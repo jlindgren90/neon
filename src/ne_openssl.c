@@ -37,7 +37,7 @@
 #include <openssl/opensslv.h>
 #include <openssl/evp.h>
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if 1 // OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define HAVE_OPENSSL110
 #endif
 
@@ -543,7 +543,7 @@ static int provide_client_cert(SSL *ssl, X509 **cert, EVP_PKEY **pkey)
     }
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x10101000L
+#if 0 // OPENSSL_VERSION_NUMBER < 0x10101000L
 #define TLS_client_method SSLv23_client_method
 #define TLS_server_method SSLv23_server_method
 #endif

@@ -700,10 +700,12 @@ static int error_ossl(ne_socket *sock, int sret)
 	}
         else
 #endif
+#if 0 // broken with wolfssl, do we need it?
 	if (reason == SSL_R_PROTOCOL_IS_SHUTDOWN) {
 	    set_error(sock, _("Secure connection reset"));
 	    return NE_SOCK_RESET;
 	}
+#endif
     }
 
     if (err == 0) {
@@ -1923,11 +1925,13 @@ int ne_sock_connect_ssl(ne_socket *sock, ne_ssl_context *ctx, void *userdata)
     }
     
     SSL_set_app_data(ssl, userdata);
+#if 0 // broken with wolfssl, do we need it?
 #if OPENSSL_VERSION_NUMBER < 0x10101000L
     SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 #else
     SSL_clear_mode(ssl, SSL_MODE_AUTO_RETRY);
 #endif    
+#endif
     SSL_set_fd(ssl, sock->fd);
     sock->ops = &iofns_ssl;
 

@@ -991,9 +991,9 @@ case $with_ssl in
    AC_MSG_ERROR([--with-ssl does not take a path argument])
    ;;
 yes|openssl)
-   NE_PKG_CONFIG(NE_SSL, openssl,
+   NE_PKG_CONFIG(NE_SSL, wolfssl,
     [AC_MSG_NOTICE(using OpenSSL $NE_SSL_VERSION library configuration from pkg-config)
-     CPPFLAGS="$CPPFLAGS ${NE_SSL_CFLAGS}"
+     CPPFLAGS="$CPPFLAGS ${NE_SSL_CFLAGS} ${NE_SSL_CFLAGS/include/include\/wolfssl} -include wolfssl/options.h"
      NEON_LIBS="$NEON_LIBS ${NE_SSL_LIBS}"],
     [# Either OpenSSL library may require -ldl if built with dynamic engine support
      NE_SEARCH_LIBS(RSA_new, crypto, -ldl)
@@ -1003,48 +1003,10 @@ yes|openssl)
    AC_CHECK_HEADERS(openssl/ssl.h openssl/opensslv.h,,
    [AC_MSG_ERROR([OpenSSL headers not found, cannot enable SSL support])])
 
-   NE_CHECK_OPENSSLVER(ne_cv_lib_ssl097, 0.9.7, 0x00907000L)
-   NE_CHECK_OPENSSLVER(ne_cv_lib_ssl110, 1.1.0, 0x10100000L)
-   if test "$ne_cv_lib_ssl110" = "yes"; then
-      NE_ENABLE_SUPPORT(SSL, [SSL support enabled, using OpenSSL $NE_SSL_VERSION])
-      AC_DEFINE(HAVE_OPENSSL11, 1, [Enable OpenSSL 1.1 support])
-   elif test "$ne_cv_lib_ssl097" = "yes"; then
-      # Enable EGD support if using 0.9.7 or newer
-      AC_MSG_NOTICE([OpenSSL >= 0.9.7; EGD support not needed in neon])
-      NE_ENABLE_SUPPORT(SSL, [SSL support enabled, using OpenSSL $NE_SSL_VERSION])
-      NE_CHECK_FUNCS(CRYPTO_set_idptr_callback SSL_SESSION_cmp)
-   else
-      # Fail if OpenSSL is older than 0.9.6
-      NE_CHECK_OPENSSLVER(ne_cv_lib_ssl096, 0.9.6, 0x00906000L)
-      if test "$ne_cv_lib_ssl096" != "yes"; then
-         AC_MSG_ERROR([OpenSSL 0.9.6 or later is required])
-      fi
-      NE_ENABLE_SUPPORT(SSL, [SSL support enabled, using OpenSSL (0.9.6 or later)])
-
-      case "$with_egd" in
-      yes|no) ne_cv_lib_sslegd=$with_egd ;;
-      /*) ne_cv_lib_sslegd=yes
-          AC_DEFINE_UNQUOTED([EGD_PATH], "$with_egd", 
-			     [Define to specific EGD socket path]) ;;
-      *) # Guess whether EGD support is needed
-         AC_CACHE_CHECK([whether to enable EGD support], [ne_cv_lib_sslegd],
-	 [if test -r /dev/random || test -r /dev/urandom; then
-	    ne_cv_lib_sslegd=no
-	  else
-	    ne_cv_lib_sslegd=yes
-	  fi])
-	 ;;
-      esac
-      if test "$ne_cv_lib_sslegd" = "yes"; then
-        AC_MSG_NOTICE([EGD support enabled for seeding OpenSSL PRNG])
-        AC_DEFINE([ENABLE_EGD], 1, [Define if EGD should be supported])
-      fi
-   fi
-
+   NE_ENABLE_SUPPORT(SSL, [SSL support enabled, using OpenSSL $NE_SSL_VERSION])
+   AC_DEFINE([HAVE_OPENSSL11], 1, [Enable OpenSSL 1.1 support])
    AC_DEFINE([HAVE_OPENSSL], 1, [Define if OpenSSL support is enabled])
    NEON_EXTRAOBJS="$NEON_EXTRAOBJS ne_openssl"
-
-   AC_DEFINE([HAVE_NTLM], 1, [Define if NTLM is supported])
    ;;
 gnutls)
    NE_PKG_CONFIG(NE_SSL, gnutls,

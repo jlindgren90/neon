@@ -417,6 +417,7 @@ void ne_md5_destroy_ctx(struct ne_md5_ctx *ctx)
 }
 #endif /* HAVE_OPENSSL */
 
+#if 0 // broken with wolfssl, do we need it?
 /* Put result from CTX in first 16 bytes following RESBUF.  The result
    must be in little endian byte order.
 
@@ -438,6 +439,7 @@ md5_read_ctx (const struct md5_ctx *ctx, void *resbuf)
 
   return resbuf;
 }
+#endif
 
 
 /* Compute MD5 message digest for bytes read from STREAM.  The
